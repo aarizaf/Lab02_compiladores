@@ -1,0 +1,44 @@
+# Makefile para compilar el analizador léxico-sintáctico
+# Reemplazar los apellidos según corresponda
+APELLIDOS = Apellido1_Apellido2_Apellido3_Apellido4
+NOMBRE_PROGRAMA = LAB03_$(APELLIDOS)
+
+# Compiladores
+LEX = flex
+YACC = bison
+CC = gcc
+CFLAGS = -Wall -g
+
+# Archivos actuales (analizador.l y analizador.y)
+LEX_SOURCE = analizador.l
+YACC_SOURCE = analizador.y
+LEX_C = lex.yy.c
+YACC_C = analizador.tab.c
+YACC_H = analizador.tab.h
+EXECUTABLE = analizador
+
+# Archivos de prueba
+ENTRADA = entrada.txt
+SALIDA = salida.txt
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(YACC_C) $(LEX_C)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(YACC_C) $(LEX_C) -lfl
+
+$(YACC_C) $(YACC_H): $(YACC_SOURCE)
+	$(YACC) -d $(YACC_SOURCE)
+
+$(LEX_C): $(LEX_SOURCE) $(YACC_H)
+	$(LEX) $(LEX_SOURCE)
+
+clean:
+	del /Q $(LEX_C) $(YACC_C) $(YACC_H) $(EXECUTABLE).exe $(SALIDA) 2>nul || echo "Limpieza completada"
+
+test: $(EXECUTABLE)
+	$(EXECUTABLE).exe $(ENTRADA) $(SALIDA)
+	@echo.
+	@echo --- Contenido de salida.txt ---
+	@type $(SALIDA)
+
+.PHONY: all clean test
